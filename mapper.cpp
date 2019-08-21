@@ -21,6 +21,29 @@ string convertNumberToBinary(int n, int len) {
 	return answer;
 }
 
+string convertNumberToBinarySimple(int n) {
+	string answer = "";
+	while (n != 0) {
+		answer = to_string(n % 2) + answer;
+		n = n / 2;
+	}
+	return answer;
+}
+
+
+class MyState{
+	vector<int> state;
+	vector<string> orientation;
+	int cost;
+}
+
+
+class statePriorityQueue{
+
+};
+
+
+
 class GeneSequence {
 public:
 	vector<string> strings;
@@ -29,7 +52,6 @@ public:
 	int cc;
 	int k;
 	int vsize;
-
 	// constructor
 	GeneSequence(int vocSize, vector<char> vocab, int kin, vector<string> stringSequence, int ccin, vector<vector<int> > inputCostMap) {
 		this->strings = stringSequence;
@@ -38,6 +60,15 @@ public:
 		this->cc = ccin;
 		this->k = kin;
 		this->vsize = vocSize;
+		
+	}
+	//Printing the present state for debugging
+	
+	void printPresentState(){
+		for(int i=0;i<this->state.size();i++){
+			cout<<state.at(i)<<" ";
+		}
+		cout<<endl;
 	}
 
 	// prints all the strings in the scenario
@@ -58,8 +89,7 @@ public:
 	}
 
 	// finds the character index in the vocabulary
-	int findInVocabulary(char c)
-	{
+	int findInVocabulary(char c){
 		for (int i = 0; i < vsize; i++)
 		{
 			if (vocabulary[i] == c)
@@ -113,6 +143,159 @@ public:
 			bruteDividedStrings.push_back(tempString);
 		}
 		return bruteDividedStrings;
+	}
+
+	bool twoVectorsEqual(vector<int> v1, vector<int> v2){
+		if(v1.size() == v2.size()){
+			for(int i=0;i<v1.size();i++){
+				if(v1.at(i) != v2.at(i)){
+					return 0;
+				}
+			}
+			return 1;
+		}
+		return 0;
+	}
+
+	int computeStepCost(vector<int> initialState, vector<int> finalState, int dashInsertCost, vector<string> initialOrientation, int step){
+		int answer = 0;
+		int tempString = "";
+		vector<string> tempOrientation = getNextOrientation(initialState, finalState, step, initialOrientation);
+		for(int j=0;j<step;j++){
+			tempString = "";
+			for(int i=0;i<tempOrientation.size();i++){
+				tempString = tempString + tempOrientation[i][j];
+			}
+			answer = answer + computeCostString(tempString);
+		}
+		return answer;
+	}
+
+	vector<string> getNextOrientation(vector<int> initialState, vector<int> finalState, int step, vector<string> initialOrientation){
+		vector<string> tempOrientation = initialOrientation;
+		for(int i=0;i<tempOrientation.size();i++){
+			if(finalState[i] - initialState[i] != 1){
+				tempOrientation.at(i).insert(tempOrientation.at(i).begin() + step, '-');
+			}
+		}
+		return getNextOrientation;
+	}
+
+	//In a vector of states, is a particular state present?
+	int isStatePresent(vector<MyState*> stateSequence, vector<int> key_state){
+		for(int i=0;i<stateSequence.size();i++){
+			if(twoVectorsEqual(stateSequence.at(i)->state), key_state){
+				return i;
+			}
+		}
+		return -1;
+	}
+
+	//Generating children states
+	vector<vector<int> > childrenState(vector<int> curr_state, int step){
+		int n = curr_state.size();
+		string tempString;
+		vector<vector<int> > answer;
+		for(int i=1;i<pow(2, n);i++){
+			vector<int> tempState;
+			tempString = convertNumberToBinary(i, n);
+			for(int j=0;j<n;j++){
+				if(tempString.at(j) == '1'){
+					tempState.push_back(curr_state.at(step) + 1);
+				}
+				else{
+					tempState.push_back(curr_state.at(step));
+				}
+			}
+			answer.push_back(tempState);
+		}
+		return answer;
+	}
+
+
+	int getIndexInPriorityQueue(vector<MyState*> myState, MyState* newState){
+		int tempI = 0;
+		for(int i=0;i<myState.size();i++){
+			if(myState.at(i)->cost < newState->cost){
+				tempI = myState.at(i)->cost;
+			}
+		}
+		return tempI;
+	}
+
+	void djakstra(){
+		MyState* curr_state = new MyState();
+		MyState* goalState = new MyState();
+		vector<string> stringSequence = strings;
+		int step = 0;
+
+		for(int i=0;i<stringSequence.size();i++){
+			curr_state.push_back(0);
+			goalState.push_back(stringSequence.at(i).size());
+		}
+
+		vector<MyState*> stateVisited;
+		vector<MyState*> priority_queue;
+		vector<int> level;
+		priority_queue.push_back(curr_state);
+		stateVisited.push_back(curr_state);
+		level.push_back(0);
+		
+		MyState* tempState;
+		
+		vector<int> tempInsertState;
+		
+		vector<vector<int> > tempChildren;
+		
+		int tempLevel;
+		
+		int tempCost;
+		int dashInsertCost = 0;
+		int tempIndex;
+		int final_cost = 10000;
+		while(priority_queue.size() != 0){
+			tempState = priority_queue.at(priority_queue.size() - 1);
+			tempLevel = level.at(level.size() - 1);
+			tempCost = tempState->cost;
+			tempChildren = childrenState(tempState, tempLevel + 1);
+
+			if(twoVectorsEqual(tempState->state, goalState)){
+				if(final_cost > tempState->cost){
+					final_cost = tempState->cost;
+				}
+				continue;
+			}
+
+			for(int i=0;i<tempChildren.size();i++){
+				tempInsertState = tempChildren[i];
+				MyState* newState;
+				newState->state = tempInsertState;
+				newState->cost = computeStepCost(tempState->state, tempInsertState, dashInsertCost, tempState->orientation, tempLevel + 1);
+				newState->orientation = getNextOrientation(tempState->state, tempInsertState, tempLevel+1, tempState->orientation);
+				if(isStatePresent(stateVisited, tempInsertState) == -1){
+					stateVisited.push_back(newState);
+					tempIndex = getIndexInPriorityQueue(newState);
+					priority_queue.insert(priority_queue.begin() + tempIndex, newState);
+					level.insert(level.begin() + tempIndex, tempLevel + 1);
+				}
+				else{
+					int tempIndex1 = isStatePresent(stateVisited, tempInsertState);
+					if(stateVisited[tempIndex1]->cost > newState->cost){
+						stateVisited[tempIndex1]->cost = newState->cost;
+						stateVisited[tempIndex1]->orientation = newState->orientation;
+						for(int i=0;i<priority_queue.size();i++){
+							if(twoVectorsEqual(priority_queue.at(i)->state, newState->state)){
+								priority_queue.at(i)->cost = newState->cost;
+								priority_queue.at(i)->orientation = newState->orientation;
+							}
+						}
+					}
+				}
+			}
+			priority_queue.pop_back();
+			level.pop_back();		
+		}
+		return final_cost;
 	}
 
 	// reduces extra '-'s in the brute force adjusted strings
@@ -263,12 +446,9 @@ public:
 					index++;
 				}
 			}*/
-			
 			// updating the main vector of strings now (the copy recorded in the function)
-			for (int j = 0; j < k; j++)
-			{
-				if (tempBest[j] == '-')
-				{
+			for (int j = 0; j < k; j++){
+				if (tempBest[j] == '-'){
 					tempVector[j].insert(tempVector[j].begin() + i, '-');
 				}
 			}

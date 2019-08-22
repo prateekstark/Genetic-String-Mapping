@@ -37,9 +37,12 @@ public:
 	vector<string> orientation;
 	int cost;
 	MyState(){
-		vector<int> state;
-		vector<string> orientation;
 		this->cost = 0;
+	}
+	MyState(vector<int> curr_state, vector<string> curr_orientation, int curr_cost){
+		this->state = curr_state;
+		this->orientation = curr_orientation;
+		this->cost = curr_cost;
 	}
 };
 
@@ -163,12 +166,12 @@ public:
 		return 0;
 	}
 
-	int computeStepCost(vector<int> initialState, vector<int> finalState, vector<string> initialOrientation, int step){
+	int computeStepCost(vector<int> initialState, vector<int> finalState, vector<string> initialOrientation, int step, int parentCost){
 		int answer = 0;
 		string tempString = "";
-		printStringVector(initialOrientation);
+		// printStringVector(initialOrientation);
 		vector<string> tempOrientation = getNextOrientation(initialState, finalState, step - 1 , initialOrientation);
-		printStringVector(tempOrientation);
+		// printStringVector(tempOrientation);
 		for(int j=0;j<step;j++){
 			tempString = "";
 			for(int i=0;i<tempOrientation.size();i++){
@@ -176,7 +179,7 @@ public:
 			}
 			answer = answer + computeCostString(tempString);
 		}
-		return answer;
+		return (answer + parentCost);
 	}
 
 	vector<string> getNextOrientation(vector<int> initialState, vector<int> finalState, int step, vector<string> initialOrientation){
@@ -242,7 +245,7 @@ public:
 		int tempI = 0;
 		for(int i=0;i<myState.size();i++){
 			if(myState.at(i)->cost < newState->cost){
-				tempI = myState.at(i)->cost;
+				tempI = i;
 			}
 		}
 		return tempI;
@@ -290,6 +293,7 @@ public:
 		int dashInsertCost = 0;
 		int tempIndex;
 		int final_cost = 10000;
+		MyState* newState;
 		vector<int> a;
 		while(priority_queue.size() != 0){
 			tempState = priority_queue.at(priority_queue.size() - 1);
@@ -311,6 +315,8 @@ public:
 					final_cost = tempState->cost;
 					stringSequence = tempState->orientation;
 				}
+				priority_queue.pop_back();
+				level.pop_back();
 				continue;
 			}
 			// return stringSequence;
@@ -319,19 +325,19 @@ public:
 			for(int i=0;i<tempChildren.size();i++){
 				tempInsertState = tempChildren[i];
 				printVector(tempInsertState);
-				MyState* newState;
-				newState->state = tempInsertState;
-				newState->cost = computeStepCost(tempState->state, tempInsertState, tempState->orientation, tempLevel + 1);
+				newState = new MyState(tempInsertState, getNextOrientation(tempState->state, tempInsertState, tempLevel, tempState->orientation), computeStepCost(tempState->state, tempInsertState, tempState->orientation, tempLevel + 1, tempState->cost));
+				// newState->state = tempInsertState;
+				// newState->cost = computeStepCost(tempState->state, tempInsertState, tempState->orientation, tempLevel + 1);
 				// cout<<newState->cost<<endl;
 				// return stringSequence;
-				printVector(tempState->state);
-				printVector(tempInsertState);
-				printStringVector(tempState->orientation);
-				vector<string> tempOrientation1(getNextOrientation(tempState->state, tempInsertState, tempLevel, tempState->orientation));
-				newState->orientation;
-				// newState->orientation = getNextOrientation(tempState->state, tempInsertState, tempLevel, tempState->orientation);
+				// printVector(tempState->state);
+				// printVector(tempInsertState);
 				printStringVector(newState->orientation);
-				return stringSequence;
+				// vector<string> tempOrientation1();
+				// newState->orientation;
+				// newState->orientation = getNextOrientation(tempState->state, tempInsertState, tempLevel, tempState->orientation);
+				// printStringVector(newState->orientation);
+				// return stringSequence;
 				// if(isStatePresent(stateVisited, tempInsertState) == -1){
 				// stateVisited.push_back(newState);
 				tempIndex = getIndexInPriorityQueue(priority_queue, newState);

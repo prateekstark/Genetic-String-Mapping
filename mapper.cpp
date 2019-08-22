@@ -91,11 +91,11 @@ public:
 	}
 
 	// prints all the strings in the scenario
-	void printStringVector() {
-		for (int i = 0; i < strings.size(); i++) {
-			cout << strings.at(i) << endl;
-		}
-	}
+	// void printStringVector() {
+	// 	for (int i = 0; i < strings.size(); i++) {
+	// 		cout << strings.at(i) << endl;
+	// 	}
+	// }
 
 	// prints the saved costmap
 	void printCostMap() {
@@ -171,14 +171,19 @@ public:
 		// printStringVector(initialOrientation);
 		vector<string> tempOrientation = getNextOrientation(initialState, finalState, step - 1 , initialOrientation);
 		// printStringVector(tempOrientation);
+		int tempDash = 0;
 		for(int j=0;j<step;j++){
 			tempString = "";
+			tempDash = 0;
 			for(int i=0;i<tempOrientation.size();i++){
 				tempString = tempString + tempOrientation[i][j];
+				if(tempOrientation[i][j] == '-'){
+					tempDash++;
+				}
 			}
-			answer = answer + computeCostString(tempString);
+			answer = answer + computeCostString(tempString) + (tempDash*cc);
 		}
-		return (answer);
+		return answer;
 	}
 
 	//Given initial orienation, initial state and the final state we find the next orientation
@@ -286,20 +291,21 @@ public:
 			tempCost = tempState->cost;
 			tempChildren = childrenState(tempState->state, goalState);
 			if(twoVectorsEqual(tempState->state, goalState)){
+				// cout<<tempState->cost<<"iamgreat"<<endl;
 				if(final_cost > tempState->cost){
+					// cout<<"hello";
 					final_cost = tempState->cost;
+					cout<<final_cost<<endl;
 					stringSequence = tempState->orientation;
 				}
-				priority_queue.pop_back();
-				level.pop_back();
-				continue;
 			}
 
 			for(int i=0;i<tempChildren.size();i++){
 				tempInsertState = tempChildren[i];
-				printVector(tempInsertState);
+				// cout<<tempLevel<<" ";
+				// printVector(tempInsertState);
 				newState = new MyState(tempInsertState, getNextOrientation(tempState->state, tempInsertState, tempLevel, tempState->orientation), computeStepCost(tempState->state, tempInsertState, tempState->orientation, tempLevel + 1));
-				printStringVector(newState->orientation);
+				// printStringVector(newState->orientation);
 				tempIndex = getIndexInPriorityQueue(priority_queue, newState);
 				priority_queue.insert(priority_queue.begin() + tempIndex, newState);
 				level.insert(level.begin() + tempIndex, tempLevel + 1);

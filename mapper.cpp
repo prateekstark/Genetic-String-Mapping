@@ -32,10 +32,16 @@ string convertNumberToBinarySimple(int n) {
 
 
 class MyState{
+public:
 	vector<int> state;
 	vector<string> orientation;
 	int cost;
-}
+	MyState(){
+		vector<int> state;
+		vector<string> orientation;
+		this->cost = 0;
+	}
+};
 
 
 class statePriorityQueue{
@@ -64,12 +70,12 @@ public:
 	}
 	//Printing the present state for debugging
 	
-	void printPresentState(){
-		for(int i=0;i<this->state.size();i++){
-			cout<<state.at(i)<<" ";
-		}
-		cout<<endl;
-	}
+	// void printPresentState(){
+	// 	for(int i=0;i<this->state.size();i++){
+	// 		cout<<state.at(i)<<" ";
+	// 	}
+	// 	cout<<endl;
+	// }
 
 	// prints all the strings in the scenario
 	void printStringVector() {
@@ -157,10 +163,12 @@ public:
 		return 0;
 	}
 
-	int computeStepCost(vector<int> initialState, vector<int> finalState, int dashInsertCost, vector<string> initialOrientation, int step){
+	int computeStepCost(vector<int> initialState, vector<int> finalState, vector<string> initialOrientation, int step){
 		int answer = 0;
-		int tempString = "";
-		vector<string> tempOrientation = getNextOrientation(initialState, finalState, step, initialOrientation);
+		string tempString = "";
+		printStringVector(initialOrientation);
+		vector<string> tempOrientation = getNextOrientation(initialState, finalState, step - 1 , initialOrientation);
+		printStringVector(tempOrientation);
 		for(int j=0;j<step;j++){
 			tempString = "";
 			for(int i=0;i<tempOrientation.size();i++){
@@ -175,39 +183,56 @@ public:
 		vector<string> tempOrientation = initialOrientation;
 		for(int i=0;i<tempOrientation.size();i++){
 			if(finalState[i] - initialState[i] != 1){
-				tempOrientation.at(i).insert(tempOrientation.at(i).begin() + step, '-');
+				tempOrientation[i].insert(tempOrientation[i].begin() + step, '-');
 			}
 		}
-		return getNextOrientation;
+		return tempOrientation;
 	}
 
 	//In a vector of states, is a particular state present?
 	int isStatePresent(vector<MyState*> stateSequence, vector<int> key_state){
 		for(int i=0;i<stateSequence.size();i++){
-			if(twoVectorsEqual(stateSequence.at(i)->state), key_state){
+			if(twoVectorsEqual(stateSequence.at(i)->state, key_state)){
 				return i;
 			}
 		}
 		return -1;
 	}
 
+	bool isHayPresentInStack(vector<int> hay, vector<vector<int> > stack){
+		for(int i=0;i<stack.size();i++){
+			if(twoVectorsEqual(stack[i], hay)){
+				return 1;
+			}
+		}
+		return 0;
+	}
+
 	//Generating children states
-	vector<vector<int> > childrenState(vector<int> curr_state, int step){
+	vector<vector<int> > childrenState(vector<int> curr_state, vector<int> goalState){
+		vector<vector<int> > answer;
+		if(twoVectorsEqual(curr_state, goalState)){
+			return answer;
+		}
 		int n = curr_state.size();
 		string tempString;
-		vector<vector<int> > answer;
+		
 		for(int i=1;i<pow(2, n);i++){
 			vector<int> tempState;
 			tempString = convertNumberToBinary(i, n);
+			// cout<<tempString;
 			for(int j=0;j<n;j++){
-				if(tempString.at(j) == '1'){
-					tempState.push_back(curr_state.at(step) + 1);
+				if(tempString.at(j) == '1' && curr_state[j] < goalState[j]){
+					tempState.push_back(curr_state.at(j) + 1);
 				}
 				else{
-					tempState.push_back(curr_state.at(step));
+					tempState.push_back(curr_state.at(j));
 				}
 			}
-			answer.push_back(tempState);
+			if(!isHayPresentInStack(tempState, answer) && !twoVectorsEqual(curr_state, tempState)){
+				answer.push_back(tempState);	
+			}
+			
 		}
 		return answer;
 	}
@@ -222,80 +247,115 @@ public:
 		}
 		return tempI;
 	}
+	void printVector(vector<int> v){
+		for(int i=0;i<v.size();i++){
+			cout<<v[i]<<" ";
+		}
+		cout<<endl;
+	}
 
-	void djakstra(){
-		MyState* curr_state = new MyState();
-		MyState* goalState = new MyState();
+	void printStringVector(vector<string> v){
+		for(int i=0;i<v.size();i++){
+			cout<<v[i]<<endl;
+		}
+	}
+
+	vector<string> djakstra(){
+		vector<int> curr_state;
+		vector<int> goalState;
 		vector<string> stringSequence = strings;
 		int step = 0;
-
 		for(int i=0;i<stringSequence.size();i++){
 			curr_state.push_back(0);
 			goalState.push_back(stringSequence.at(i).size());
 		}
+		printVector(curr_state);
+		printVector(goalState);
 
-		vector<MyState*> stateVisited;
+		// vector<MyState*> stateVisited;
+		// return stringSequence;
 		vector<MyState*> priority_queue;
 		vector<int> level;
-		priority_queue.push_back(curr_state);
-		stateVisited.push_back(curr_state);
+		MyState* tempState = new MyState();
+		// stateVisited.push_back(curr_state);
+		tempState->state = curr_state;
+		tempState->orientation = stringSequence;
+		tempState->cost = 0;
+		priority_queue.push_back(tempState);
 		level.push_back(0);
-		
-		MyState* tempState;
-		
 		vector<int> tempInsertState;
-		
 		vector<vector<int> > tempChildren;
-		
 		int tempLevel;
-		
 		int tempCost;
 		int dashInsertCost = 0;
 		int tempIndex;
 		int final_cost = 10000;
+		vector<int> a;
 		while(priority_queue.size() != 0){
 			tempState = priority_queue.at(priority_queue.size() - 1);
 			tempLevel = level.at(level.size() - 1);
 			tempCost = tempState->cost;
-			tempChildren = childrenState(tempState, tempLevel + 1);
-
+			// cout<<tempCost;
+			// return stringSequence;
+			tempChildren = childrenState(tempState->state, goalState);
+			// return stringSequence;
+			// for(int k=0;k<tempChildren.size();k++){
+			// 	for(int l=0;l<tempChildren[k].size();l++){
+			// 		cout<<tempChildren[k][l]<<" ";
+			// 	}
+			// 	cout<<endl;
+			// }
+			//Done debugging till this point!
 			if(twoVectorsEqual(tempState->state, goalState)){
 				if(final_cost > tempState->cost){
 					final_cost = tempState->cost;
+					stringSequence = tempState->orientation;
 				}
 				continue;
 			}
+			// return stringSequence;
+
 
 			for(int i=0;i<tempChildren.size();i++){
 				tempInsertState = tempChildren[i];
+				printVector(tempInsertState);
 				MyState* newState;
 				newState->state = tempInsertState;
-				newState->cost = computeStepCost(tempState->state, tempInsertState, dashInsertCost, tempState->orientation, tempLevel + 1);
-				newState->orientation = getNextOrientation(tempState->state, tempInsertState, tempLevel+1, tempState->orientation);
-				if(isStatePresent(stateVisited, tempInsertState) == -1){
-					stateVisited.push_back(newState);
-					tempIndex = getIndexInPriorityQueue(newState);
-					priority_queue.insert(priority_queue.begin() + tempIndex, newState);
-					level.insert(level.begin() + tempIndex, tempLevel + 1);
-				}
-				else{
-					int tempIndex1 = isStatePresent(stateVisited, tempInsertState);
-					if(stateVisited[tempIndex1]->cost > newState->cost){
-						stateVisited[tempIndex1]->cost = newState->cost;
-						stateVisited[tempIndex1]->orientation = newState->orientation;
-						for(int i=0;i<priority_queue.size();i++){
-							if(twoVectorsEqual(priority_queue.at(i)->state, newState->state)){
-								priority_queue.at(i)->cost = newState->cost;
-								priority_queue.at(i)->orientation = newState->orientation;
-							}
-						}
-					}
-				}
+				newState->cost = computeStepCost(tempState->state, tempInsertState, tempState->orientation, tempLevel + 1);
+				// cout<<newState->cost<<endl;
+				// return stringSequence;
+				printVector(tempState->state);
+				printVector(tempInsertState);
+				printStringVector(tempState->orientation);
+				vector<string> tempOrientation1(getNextOrientation(tempState->state, tempInsertState, tempLevel, tempState->orientation));
+				newState->orientation;
+				// newState->orientation = getNextOrientation(tempState->state, tempInsertState, tempLevel, tempState->orientation);
+				printStringVector(newState->orientation);
+				return stringSequence;
+				// if(isStatePresent(stateVisited, tempInsertState) == -1){
+				// stateVisited.push_back(newState);
+				tempIndex = getIndexInPriorityQueue(priority_queue, newState);
+				priority_queue.insert(priority_queue.begin() + tempIndex, newState);
+				level.insert(level.begin() + tempIndex, tempLevel + 1);
+				// }
+				// else{
+				// 	int tempIndex1 = isStatePresent(stateVisited, tempInsertState);
+				// 	if(stateVisited[tempIndex1]->cost > newState->cost){
+				// 		stateVisited[tempIndex1]->cost = newState->cost;
+				// 		stateVisited[tempIndex1]->orientation = newState->orientation;
+				// 		for(int i=0;i<priority_queue.size();i++){
+				// 			if(twoVectorsEqual(priority_queue.at(i)->state, newState->state)){
+				// 				priority_queue.at(i)->cost = newState->cost;
+				// 				priority_queue.at(i)->orientation = newState->orientation;
+				// 			}
+				// 		}
+				// 	}
+				// }
 			}
 			priority_queue.pop_back();
 			level.pop_back();		
 		}
-		return final_cost;
+		return stringSequence;
 	}
 
 	// reduces extra '-'s in the brute force adjusted strings
@@ -496,8 +556,10 @@ int main() {
 	}
 	GeneSequence* genes = new GeneSequence(vsize+1, myVocabulary, k, myStrings, cc, costMap);
 	//genes->balanceStrings();
-	genes->minimumCost();
-	genes->printStringVector();
+	vector<string> answer = genes->djakstra();
+	for(int i=0;i<answer.size();i++){
+		cout<<answer[i]<<endl;
+	}
 
 
 	//TODO Handle # input ?

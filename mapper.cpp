@@ -70,6 +70,21 @@ public:
 	}
 };
 
+
+class localSearchState{
+public:
+	vector<int> state;
+	vector<string> orientation;
+	int cost;
+
+
+};
+
+
+
+
+
+
 class GeneSequence {
 public:
 	vector<string> strings;
@@ -87,7 +102,7 @@ public:
 		this->cc = ccin;
 		this->k = kin;
 		this->vsize = vocSize;
-		
+
 	}
 
 	// prints all the strings in the scenario
@@ -123,20 +138,21 @@ public:
 	}
 
 	// appends extra '-'s at each string to reach max length
-	void balanceStrings() {
+	vector<string> balanceStrings(vector<string> str){
 		int maxStringSize = 0;
-		for (int i = 0; i < strings.size(); i++) {
-			if (strings[i].size() > maxStringSize) {
-				maxStringSize = strings[i].size();
+		for (int i = 0; i < str.size(); i++){
+			if (str[i].size() > maxStringSize){
+				maxStringSize = str[i].size();
 			}
 		}
-		for (int i = 0; i < strings.size(); i++) {
-			if (strings[i].size() < maxStringSize) {
-				while (strings[i].size() != maxStringSize) {
-					strings[i] = strings[i] + "-";
+		for(int i = 0; i < str.size(); i++){
+			if(str[i].size() < maxStringSize){
+				while (str[i].size() != maxStringSize){
+					str[i] = str[i] + "-";
 				}
 			}
 		}
+		return str;
 	}
 
 	// adds 3 '-'s for each character in the string to inculcate all the cases
@@ -225,7 +241,7 @@ public:
 		}
 		int n = curr_state.size();
 		string tempString;
-		
+
 		for(int i=1;i<pow(2, n);i++){
 			vector<int> tempState;
 			tempString = convertNumberToBinary(i, n);
@@ -239,9 +255,9 @@ public:
 				}
 			}
 			if(!isHayPresentInStack(tempState, answer) && !twoVectorsEqual(curr_state, tempState)){
-				answer.push_back(tempState);	
+				answer.push_back(tempState);
 			}
-			
+
 		}
 		return answer;
 	}
@@ -256,7 +272,7 @@ public:
 		}
 		return tempI;
 	}
-	
+
 //Implementing Djakstra
 	vector<string> djakstra(){
 		vector<int> curr_state;
@@ -311,7 +327,7 @@ public:
 				level.insert(level.begin() + tempIndex, tempLevel + 1);
 			}
 			priority_queue.pop_back();
-			level.pop_back();		
+			level.pop_back();
 		}
 		return stringSequence;
 	}
@@ -334,6 +350,97 @@ public:
 			}
 		}
 		return bruteDividedStrings;
+	}
+
+
+	vector<string> insertDashAtLast(vector<string> v){
+		for(int i=0;i<v.size();i++){
+			v.at(i) = v.at(i) + '-';
+		}
+		return v;
+	}
+
+	vector<string> hillClimbingOneIter(vector<string> myStrings){
+		vector<string> startSequence = myStrings;
+		startSequence = this->balanceStrings(startSequence);
+		// vector<string> a;
+		// printStringVector(startSequence);
+		// return a;
+		int len = myStrings[0].size();
+		int stepCost = computeCostVector(startSequence);
+		int tempCost;
+		int tempMinCost = 10000;
+		int tempMinIndex;
+		vector<string> tempStringVector = startSequence;
+		bool flag = 0;
+		for(int i=0;i<len;i++){
+			tempMinCost = 10000;
+			flag = 0;
+			for(int j=0;j<startSequence.size();j++){
+				if(startSequence.at(j).at(len-1) == '-'){
+					tempStringVector = startSequence;
+					tempStringVector.at(j) = tempStringVector.at(j).substr(0, tempStringVector.at(j).size() - 1);
+					tempStringVector[j].insert(tempStringVector[j].begin() + i, '-');
+					tempCost = computeCostVector(tempStringVector);
+					flag = 1;
+					if(tempCost < tempMinCost){
+						tempMinCost = tempCost;
+						tempMinIndex = j;
+					}
+				}
+			}
+			if(flag){
+				// startSequence[tempMinIndex].erase(startSequence[tempMinIndex].end());
+				startSequence.at(tempMinIndex) = startSequence.at(tempMinIndex).substr(0, startSequence.at(tempMinIndex).size() - 1);
+				startSequence[tempMinIndex].insert(startSequence[tempMinIndex].begin() + i, '-');
+			}
+		}
+		// startSequence = insertDashAtLast(startSequence);
+		// printStringVector(startSequence);
+		// len++;
+		// for(int i=0;i<len;i++){
+		// 	tempMinCost = 10000;
+		// 	flag = 0;
+		// 	for(int j=0;j<startSequence.size();j++){
+		// 		if(startSequence.at(j).at(len-1) == '-'){
+		// 			tempStringVector = startSequence;
+		// 			tempStringVector.at(j) = tempStringVector.at(j).substr(0, tempStringVector.at(j).size() - 1);
+		// 			tempStringVector.at(j).insert(tempStringVector[j].begin() + i, '-');
+		// 			tempCost = computeCostVector(tempStringVector);
+		// 			flag = 1;
+		// 			if(tempCost < tempMinCost){
+		// 				tempMinCost = tempCost;
+		// 				tempMinIndex = j;
+		// 			}
+		// 		}
+		// 	}
+		// 	if(flag){
+		// 		// startSequence[tempMinIndex].erase(startSequence[tempMinIndex].end());
+		// 		startSequence.at(tempMinIndex) = startSequence.at(tempMinIndex).substr(0, startSequence.at(tempMinIndex).size() - 1);
+		// 		startSequence.at(tempMinIndex).insert(startSequence[tempMinIndex].begin() + i, '-');
+		// 	}
+		// }
+		return startSequence;
+	}
+
+	vector<string> hillClimbing(){
+		vector<string> a;
+		vector<string> startSequence = strings;
+		startSequence = balanceStrings(startSequence);
+		int tempCost = computeCostVector(startSequence);
+		vector<string> answer;
+		vector<string> tempAnswer;
+		for(int i=0;i<100;i++){
+			tempAnswer = hillClimbingOneIter(startSequence);
+			printStringVector(tempAnswer);
+			return a;
+			if(computeCostVector(tempAnswer) < tempCost){
+				tempCost = computeCostVector(tempAnswer);
+				answer = tempAnswer;
+			}
+			startSequence = insertDashAtLast(startSequence);
+		}
+		return answer;
 	}
 
 	// compute cost between two equal length strings
@@ -376,6 +483,19 @@ public:
 			}
 			answer = answer + costMap.at(index1).at(index2);
 		}
+	}
+
+	int computeCostVector(vector<string> v){
+		int tempCost = 0;
+		string tempString = "";
+		for(int i=0;i<v[0].size();i++){
+			tempString = "";
+			for(int j=0;j<v.size();j++){
+				tempString = tempString + v[j][i];
+			}
+			tempCost = tempCost + computeCostString(tempString);
+		}
+		return tempCost;
 	}
 
 
@@ -425,7 +545,7 @@ public:
 		for (int i = 0; i < maxLength; i++) {
 			tempString = "";
 			for (int j = 0; j < tempVector.size(); j++) {
-				
+
 				if (tempVector.at(j).size() > i) {
 					tempString = tempString + tempVector.at(j).at(i);
 				}
@@ -502,7 +622,7 @@ int main() {
 
 	cin >> cc;													// input for conversion cost
 
-	int tempInt;												// input for matching cost matrix							
+	int tempInt;												// input for matching cost matrix
 	for (i = 0; i < vsize + 1; i++) {
 		vector<int> tempVector;
 		for (j = 0; j < vsize + 1; j++) {
@@ -513,7 +633,7 @@ int main() {
 	}
 	GeneSequence* genes = new GeneSequence(vsize+1, myVocabulary, k, myStrings, cc, costMap);
 	//genes->balanceStrings();
-	vector<string> answer = genes->djakstra();
+	vector<string> answer = genes->hillClimbing();
 	for(int i=0;i<answer.size();i++){
 		cout<<answer[i]<<endl;
 	}

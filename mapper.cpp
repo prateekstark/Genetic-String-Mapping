@@ -353,12 +353,12 @@ public:
 		int len = myStrings[0].size();
 		int stepCost = computeCostVector(startSequence);
 		int tempCost;
-		int tempMinCost;
+		int tempMinCost = 10000;
 		int tempMinIndex;
 		vector<string> tempStringVector = startSequence;
 		bool flag = 0;
 		for(int i=0;i<len;i++){
-			tempMinCost = computeCostVector(startSequence);
+			tempMinCost = 10000;
 			flag = 0;
 			for(int j=0;j<startSequence.size();j++){
 				if(startSequence.at(j).at(len-1) == '-'){
@@ -617,11 +617,12 @@ int main() {
 	}
 	GeneSequence* genes = new GeneSequence(vsize+1, myVocabulary, k, myStrings, cc, costMap);
 	//genes->balanceStrings();
-	vector<string> answer = genes->hillClimbing();
+	vector<string> answer = genes->djakstra();
+	// genes->strings = answer;
+	// answer = genes->djakstra();
 	for(int i=0;i<answer.size();i++){
 		cout<<answer[i]<<endl;
 	}
-
 
 	//TODO Handle # input ?
 	return 0;

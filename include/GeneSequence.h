@@ -1,5 +1,5 @@
 #include "UCSState.h"
-
+#include "HillClimbingState.h"
 class GeneSequence{
 public:
 	vector<string> strings;
@@ -30,8 +30,8 @@ public:
 	int computeStepCost(vector<int> initialState, vector<int> finalState, vector<string> initialOrientation, int step);
 
 	//Given initial orienation, initial state and the final state we find the next orientation
-	vector<string> getNextOrientation(vector<int> initialState, vector<int> finalState, int step, vector<string> initialOrientation);
 
+	vector<string> getNextOrientation(vector<int> initialState, vector<int> finalState, int step, vector<string> initialOrientation);
     //In a vector of states, is a particular state present?
 	int isStatePresent(vector<UCSState*> stateSequence, vector<int> key_state);
 
@@ -55,7 +55,7 @@ public:
 	vector<string> hillClimbingOneIter(vector<string> myStrings);
 
 	vector<string> hillClimbing();
-
+	
 	// compute cost between two equal length strings
 	int computeCost(string equiLengthStr1, string equiLengthStr2);
 
@@ -66,5 +66,13 @@ public:
 
 	// minimizes the total cost by greedy local search
 	void minimumCost();
+
+	int stateCost(HillClimbingState state);
+
+	HillClimbingState generateChild(HillClimbingState parent, int num);
+
+	HillClimbingState randomState(HillClimbingState startState);
+
+	int localSearch(HillClimbingState startState);
 
 };

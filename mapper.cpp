@@ -4,7 +4,7 @@
 #include<cmath>
 using namespace std;
 
-string convertNumberToBinary(int n, int len) {
+string convertNumberToBinary(int n, int len){
 	string answer = "";
 	while (n != 0) {
 		answer = to_string(n % 2) + answer;
@@ -17,7 +17,7 @@ string convertNumberToBinary(int n, int len) {
 	return answer;
 }
 
-string convertNumberToBinarySimple(int n) {
+string convertNumberToBinarySimple(int n){
 	string answer = "";
 	while (n != 0) {
 		answer = to_string(n % 2) + answer;
@@ -70,22 +70,7 @@ public:
 	}
 };
 
-
-class localSearchState{
-public:
-	vector<int> state;
-	vector<string> orientation;
-	int cost;
-
-
-};
-
-
-
-
-
-
-class GeneSequence {
+class GeneSequence{
 public:
 	vector<string> strings;
 	vector<vector<int> > costMap;
@@ -93,7 +78,6 @@ public:
 	int cc;
 	int k;
 	int vsize;
-
 	// constructor
 	GeneSequence(int vocSize, vector<char> vocab, int kin, vector<string> stringSequence, int ccin, vector<vector<int> > inputCostMap) {
 		this->strings = stringSequence;
@@ -369,12 +353,12 @@ public:
 		int len = myStrings[0].size();
 		int stepCost = computeCostVector(startSequence);
 		int tempCost;
-		int tempMinCost = 10000;
+		int tempMinCost;
 		int tempMinIndex;
 		vector<string> tempStringVector = startSequence;
 		bool flag = 0;
 		for(int i=0;i<len;i++){
-			tempMinCost = 10000;
+			tempMinCost = computeCostVector(startSequence);
 			flag = 0;
 			for(int j=0;j<startSequence.size();j++){
 				if(startSequence.at(j).at(len-1) == '-'){
@@ -382,8 +366,8 @@ public:
 					tempStringVector.at(j) = tempStringVector.at(j).substr(0, tempStringVector.at(j).size() - 1);
 					tempStringVector[j].insert(tempStringVector[j].begin() + i, '-');
 					tempCost = computeCostVector(tempStringVector);
-					flag = 1;
 					if(tempCost < tempMinCost){
+						flag = 1;
 						tempMinCost = tempCost;
 						tempMinIndex = j;
 					}
@@ -432,14 +416,14 @@ public:
 		vector<string> tempAnswer;
 		for(int i=0;i<100;i++){
 			tempAnswer = hillClimbingOneIter(startSequence);
-			printStringVector(tempAnswer);
-			return a;
 			if(computeCostVector(tempAnswer) < tempCost){
 				tempCost = computeCostVector(tempAnswer);
 				answer = tempAnswer;
 			}
 			startSequence = insertDashAtLast(startSequence);
 		}
+		cout<<"hello"<<endl;
+		cout<<computeCostVector(answer)<<endl;
 		return answer;
 	}
 

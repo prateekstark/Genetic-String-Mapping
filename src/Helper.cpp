@@ -1,5 +1,6 @@
 #include "../include/Helper.h"
 
+
 string convertNumberToBinary(int n, int len){
 	string answer = "";
 	while (n != 0) {

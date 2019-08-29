@@ -2,7 +2,11 @@
 #include<string>
 #include<vector>
 #include<cmath>
+#include<algorithm>
+#include<iomanip>
 using namespace std;
+
+
 
 string convertNumberToBinary(int n, int len);
 

@@ -1,5 +1,10 @@
 #include "../include/GeneSequence.h"
 
+time_t startingTime, currentTime;
+int timeLimit;
+vector<string> answerReport;
+int costReport = -1;
+
 // constructor
 GeneSequence::GeneSequence(int vocSize, vector<char> vocab, int kin, vector<string> stringSequence, int ccin, vector<vector<int> > inputCostMap) {
 	this->strings = stringSequence;
@@ -161,14 +166,13 @@ int GeneSequence::computeCostString(string str) {
 	int index2 = -1;
 
 	//adding up conversion costs;
-	for (int i = 0; i < k; i++)
-	{
+	for(int i = 0; i < k; i++){
 		if (str[i] == '-')
 			answer += cc;
 	}
 
 	//adding up matching costs
-	for (int i = 0; i < k; i++) {
+	for(int i = 0; i < k; i++){
 		index1 = findInVocabulary(str[i]);
 		for (int j = i+1; j < k; j++) {
 
@@ -196,7 +200,7 @@ void GeneSequence::minimumCost(){
 	string tempBest;
 	string str2;
 
-	for (int i = 0; i < maxLength; i++) {
+	for(int i = 0; i < maxLength; i++) {
 		tempString = "";
 		for (int j = 0; j < tempVector.size(); j++) {
 
@@ -210,14 +214,14 @@ void GeneSequence::minimumCost(){
 		tempCost = computeCostString(tempString);
 		tempBest = tempString;
 		tempNum = pow(2, tempString.size());
-		for (int j = 0; j < tempNum - 1; j++) {
+		for(int j = 0; j < tempNum - 1; j++) {
 			str2 = "";
 			string s = convertNumberToBinary(j, k);
-			for (int l = 0; l < s.size(); l++) {
-				if (s.at(l) == '1') {
+			for(int l = 0; l < s.size(); l++) {
+				if(s.at(l) == '1'){
 					str2 = str2 + "-";
 				}
-				else {
+				else{
 					str2 = str2 + tempString[l];
 				}
 			}

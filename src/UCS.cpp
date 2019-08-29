@@ -59,11 +59,9 @@ vector<vector<int> > GeneSequence::childrenState(vector<int> curr_state, vector<
 	}
 	int n = curr_state.size();
 	string tempString;
-
 	for(int i=1;i<pow(2, n);i++){
 		vector<int> tempState;
 		tempString = convertNumberToBinary(i, n);
-		// cout<<tempString;
 		for(int j=0;j<n;j++){
 			if(tempString.at(j) == '1' && curr_state[j] < goalState[j]){
 				tempState.push_back(curr_state.at(j) + 1);
@@ -119,6 +117,7 @@ vector<string> GeneSequence::djakstra(){
 	int final_cost = 10000;
 	UCSState* newState;
 	vector<int> a;
+	int tempStepCost;
 	while(priority_queue.size() != 0){
 		tempState = priority_queue.at(priority_queue.size() - 1);
 		tempLevel = level.at(level.size() - 1);
@@ -138,14 +137,18 @@ vector<string> GeneSequence::djakstra(){
 			tempInsertState = tempChildren[i];
 			// cout<<tempLevel<<" ";
 			// printVector(tempInsertState);
-			newState = new UCSState(tempInsertState, getNextOrientation(tempState->state, tempInsertState, tempLevel, tempState->orientation), computeStepCost(tempState->state, tempInsertState, tempState->orientation, tempLevel + 1));
+			tempStepCost = computeStepCost(tempState->state, tempInsertState, tempState->orientation, tempLevel + 1);
+			if(tempStepCost <= final_cost){
+				newState = new UCSState(tempInsertState, getNextOrientation(tempState->state, tempInsertState, tempLevel, tempState->orientation), tempStepCost);
+				tempIndex = getIndexInPriorityQueue(priority_queue, newState);
+				priority_queue.insert(priority_queue.begin() + tempIndex, newState);
+				level.insert(level.begin() + tempIndex, tempLevel + 1);
+			}
 			// printStringVector(newState->orientation);
-			tempIndex = getIndexInPriorityQueue(priority_queue, newState);
-			priority_queue.insert(priority_queue.begin() + tempIndex, newState);
-			level.insert(level.begin() + tempIndex, tempLevel + 1);
 		}
 		priority_queue.pop_back();
 		level.pop_back();
 	}
+	printStringVector(stringSequence);
 	return stringSequence;
 }

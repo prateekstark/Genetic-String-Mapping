@@ -1,5 +1,12 @@
 #include "UCSState.h"
 #include "HillClimbingState.h"
+
+extern time_t startingTime, currentTime;
+extern int timeLimit;
+extern vector<string> answerReport;
+extern int costReport;
+
+
 class GeneSequence{
 public:
 	vector<string> strings;
@@ -55,7 +62,7 @@ public:
 	vector<string> hillClimbingOneIter(vector<string> myStrings);
 
 	vector<string> hillClimbing();
-	
+
 	// compute cost between two equal length strings
 	int computeCost(string equiLengthStr1, string equiLengthStr2);
 
@@ -69,10 +76,34 @@ public:
 
 	int stateCost(HillClimbingState state);
 
-	HillClimbingState generateChild(HillClimbingState parent, int num);
+	HillClimbingState generateChild(HillClimbingState parent, int num, int maxlen);
 
 	HillClimbingState randomState(HillClimbingState startState);
 
-	int localSearch(HillClimbingState startState);
+	int localSearch(HillClimbingState startState, int longestLength);
+
+	int computeCostVectorModified(vector<string> v);
+
+	vector<string> hillClimbingVectorOneIter(vector<string> myStrings);
+
+	vector<string> hillClimbingVector();
+
+	vector<string> addDashRandom(vector<string> v);
+
+	vector<string> beamSearch();
+
+	vector<string> hillClimbingVectorLimit(vector<string> myStrings);
+
+	bool twoSequenceEqual(vector<string> s1, vector<string> s2);
+
+	HillClimbingState GeneSequencerandomState(HillClimbingState startState);
+
+	bool checkDead(HillClimbingState state);
+
+	int maxStringLength(vector<string> v);
+
+	vector<vector<string> > generateHillClimbingVectorBest(vector<string> myStrings);
+
+	vector<string> generateLocalMinima(vector<string> myStrings);
 
 };

@@ -2,13 +2,9 @@
 #include <string>
 #include <vector>
 #include <cmath>
-#include <algorithm>
 #include <iomanip>
+#include <algorithm>
 using namespace std;
-
-//int totalCost(vector<string> strings, vector<vector<int> > costMap) {
-//
-//}
 
 string convertNumberToBinary(int n, int len) {
 	string answer = "";
@@ -349,7 +345,7 @@ int main() {
 
 	cin >> cc;													// input for conversion cost
 
-	int tempInt;												// input for matching cost matrix							
+	int tempInt;												// input for matching cost matrix
 	for (i = 0; i < vsize + 1; i++) {
 		vector<int> tempVector;
 		for (j = 0; j < vsize + 1; j++) {

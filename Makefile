@@ -6,7 +6,7 @@ GeneMapping: MainFile GeneSequence HillClimbingRR HillClimbingIter UCS UCSState 
 		g++ outputs/MainFile outputs/GeneSequence outputs/HillClimbingRR outputs/HillClimbingIter outputs/UCS outputs/UCSState outputs/HillClimbingState outputs/Helper -o GeneMapping
 
 MainFile: src/MainFile.cpp include/GeneSequence.h
-		g++ -c src/MainFile.cpp -o outputs/MainFile
+		g++ -c $(FLAG) src/MainFile.cpp -o outputs/MainFile
 
 GeneSequence: src/GeneSequence.cpp include/GeneSequence.h
 		g++ -c src/GeneSequence.cpp -o outputs/GeneSequence

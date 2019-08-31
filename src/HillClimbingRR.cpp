@@ -1,5 +1,7 @@
 #include "../include/GeneSequence.h"
 
+extern bool answerReverse;
+extern bool reversed;
 
 
 int GeneSequence::stateCost(HillClimbingState state){
@@ -178,11 +180,17 @@ int GeneSequence::localSearch(HillClimbingState startState, int longestLength){
 			{
 				costReport = globalMinCost;
 				answerReport = globalMinChild.orientation;
+                if(reversed){
+                    answerReverse = 1;
+                }
+                else{
+                    answerReverse = 0;
+                }
 			}
 
-			cout << "New minima converged at --" << endl;
-			printStringVector(parent.orientation);
-			cout << "Cost: " << globalMinCost << endl << endl;
+			// cout << "New minima converged at --" << endl;
+			// printStringVector(parent.orientation);
+			// cout << "Cost: " << globalMinCost << endl << endl;
 		}
 		parent = randomState(startState);
 

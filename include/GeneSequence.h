@@ -7,6 +7,7 @@ extern vector<string> answerReport;
 extern int costReport;
 
 
+
 class GeneSequence{
 public:
 	vector<string> strings;

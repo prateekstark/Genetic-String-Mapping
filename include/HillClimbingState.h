@@ -1,5 +1,6 @@
 #include "Helper.h"
 
+
 class HillClimbingState{
 public:
 	vector<string> orientation;

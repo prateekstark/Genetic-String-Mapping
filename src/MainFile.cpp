@@ -1,81 +1,110 @@
 #include "../include/GeneSequence.h"
-time_t startingTime, currentTime;
-int timeLimit;
-vector<string> answerReport;
-int costReport = -1;
 
+extern time_t startingTime, currentTime;
+extern int timeLimit;
+extern vector<string> answerReport;
+extern int costReport;
+extern bool reversed;
+extern bool answerReverse;
+int main(int argc, char *argv[]){
+	// cout<<argc<<endl;
+	// return 0;
+	if(argc == 3){
 
-int main(){
+		string inputFileName(argv[1]);
+		string outputFileName(argv[2]);
+		ifstream inputFile(inputFileName);
+		string line;
+		time_t timestart, timeend;
 
-	time_t timestart, timeend;
+		int vsize, k, cc, i, j;
+		float execTime;
+		string tempString;
+		vector<string> myStrings;
+		vector<vector<int> > costMap;
+		vector<int> goalTuple;
+		vector<int> zeroTuple;
+		char dumpComma;
+		getline(inputFile, line);
+		// cout<<line<<endl;										// input for the time limit of the runtime of the code
+		execTime = stof(line);
 
-	int vsize, k, cc, i, j;
-	float execTime;
-	string tempString;
-	vector<string> myStrings;
-	vector<vector<int> > costMap;
-	vector<int> goalTuple;
-	vector<int> zeroTuple;
-
-	cin >> execTime;											// input for the time limit of the runtime of the code
-
-	cin >> vsize;												// input for vocabulary size and its letters
-
-	char dumpComma;
-	vector<char> myVocabulary(vsize, '*');
-	for (i = 0; i < vsize - 1; i++)
-		cin >> myVocabulary[i] >> dumpComma;
-	cin >> myVocabulary[vsize - 1];
-	myVocabulary.push_back('-');
-
-
-	cin >> k;													// input for number of strings and the strings
-	for (i = 0; i < k; i++) {
-		cin >> tempString;
-		myStrings.push_back(tempString);
-		goalTuple.push_back(tempString.length());
-		zeroTuple.push_back(0);
-	}
-
-	cin >> cc;													// input for conversion cost
-
-	int tempInt;												// input for matching cost matrix
-	for (i = 0; i < vsize + 1; i++) {
-		vector<int> tempVector;
-		for (j = 0; j < vsize + 1; j++) {
-			cin >> tempInt;
-			tempVector.push_back(tempInt);
+		getline(inputFile, line);
+		vsize = stoi(line);												// input for vocabulary size and its letters
+		vector<char> myVocabulary(vsize, '*');
+		getline(inputFile, line);
+		int tempIndex = 0;
+		for (i = 0; i < vsize; i++){
+			myVocabulary[i] = line.at(tempIndex);
+			tempIndex = tempIndex + 3;
 		}
-		costMap.push_back(tempVector);
+		myVocabulary.push_back('-');
+		// for(int i=0;i<myVocabulary.size();i++){
+		// 	cout<<myVocabulary[i]<<" ";
+		// }
+		// cout<<endl;
+		getline(inputFile, line);
+		k = stoi(line);													// input for number of strings and the strings
+
+		for (i = 0; i < k; i++){
+			getline(inputFile, line);
+			tempString = line;
+			tempString.erase(remove(tempString.begin(), tempString.end(),' '), tempString.end());
+
+			myStrings.push_back(tempString.substr(0, tempString.size() - 1));
+			goalTuple.push_back(tempString.length());
+			zeroTuple.push_back(0);
+		}
+		getline(inputFile, line);
+		cc = stoi(line);													// input for conversion cost
+		string falseString;
+		int tempInt;											// input for matching cost matrix
+		for (i = 0; i < vsize + 1; i++) {
+			vector<int> tempVector;
+			// getline(inputFile, line);
+			tempIndex = 0;
+			for (j = 0; j < vsize + 1; j++){
+				inputFile >> tempInt;
+				// tempIndex = tempIndex + 2;
+				tempVector.push_back(tempInt);
+			}
+			costMap.push_back(tempVector);
+		}
+		// for(int i=0;i<costMap.size();i++){
+		// 	for(int j=0;j<costMap[0].size();j++){
+		// 		cout<<costMap[i][j]<<" ";
+		// 	}
+		// 	cout<<endl;
+		// }
+		char hash;
+		inputFile.close();
+		time(&timestart);
+		startingTime = timestart;
+		timeLimit = (int)(execTime * 60 - 5);
+		// cout<<myStrings[2].size()<<endl;.
+		GeneSequence* genes = new GeneSequence(vsize + 1, myVocabulary, k, myStrings, cc, costMap);
+		HillClimbingState startState(myStrings);
+		int maxlen = genes->maxStringLength(myStrings) + 15;
+		int finalCost1 = genes->localSearch(startState, maxlen);
+
+		for (int i = 0; i < k; i++)
+			reverse(startState.orientation[i].begin(), startState.orientation[i].end());
+		reversed = 1;
+		int finalCost2 = genes->localSearch(startState, maxlen);
+		answerReport = genes->balanceStrings(answerReport);
+		ofstream outputFile(outputFileName);
+		for(int i=0;i<answerReport.size();i++){
+			if(answerReverse){
+				reverse(answerReport[i].begin(), answerReport[i].end());
+			}
+			outputFile << answerReport[i] << endl;
+
+		}
+		cout << costReport << endl;
+		time(&timeend);
 	}
-
-	char hash;													// ipnut for the last hash
-	cin >> hash;
-
-	time(&timestart);
-	startingTime = timestart;
-	timeLimit = (int)(execTime * 60 - 5);
-
-	GeneSequence* genes = new GeneSequence(vsize + 1, myVocabulary, k, myStrings, cc, costMap);
-	HillClimbingState startState(myStrings);
-	// int maxlen = (genes->maxStringLength(myStrings))*vsize;
-	int maxlen = genes->maxStringLength(myStrings) + 15;
-
-	int finalCost1 = genes->localSearch(startState, maxlen);
-
-	for (int i = 0; i < k; i++)
-		reverse(startState.orientation[i].begin(), startState.orientation[i].end());
-
-	cout << "STARTED REVERSE" << endl;
-
-	int finalCost2 = genes->localSearch(startState, maxlen);
-
-	// cout << "Forward final cost: " << finalCost1 << endl;
-	// cout << "Backward final cost: " << finalCost2 << endl;
-
-	printStringVector(answerReport);
-	cout << costReport << endl;
-	time(&timeend);
-	cout << "Time taken: " << double(timeend - timestart) << setprecision(5) << "s" << endl;
+	else{
+		cerr<<"Wrong Arguments"<<endl;
+	}
 	return 0;
 }

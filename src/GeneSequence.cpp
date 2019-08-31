@@ -1,9 +1,17 @@
 #include "../include/GeneSequence.h"
+//
+// extern time_t startingTime, currentTime;
+// extern int timeLimit;
+// extern vector<string> answerReport;
+// extern int costReport;
+
 
 time_t startingTime, currentTime;
 int timeLimit;
 vector<string> answerReport;
 int costReport = -1;
+bool reversed = 0;
+bool answerReverse = 0;
 
 // constructor
 GeneSequence::GeneSequence(int vocSize, vector<char> vocab, int kin, vector<string> stringSequence, int ccin, vector<vector<int> > inputCostMap) {

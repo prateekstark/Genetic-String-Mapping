@@ -25,38 +25,39 @@ int main(int argc, char *argv[]){
 		vector<int> goalTuple;
 		vector<int> zeroTuple;
 		char dumpComma;
-		getline(inputFile, line);
+		inputFile >> execTime;
 		// cout<<line<<endl;										// input for the time limit of the runtime of the code
-		execTime = stof(line);
+		
 
-		getline(inputFile, line);
-		vsize = stoi(line);												// input for vocabulary size and its letters
+		
+		inputFile >> vsize;												// input for vocabulary size and its letters
 		vector<char> myVocabulary(vsize, '*');
-		getline(inputFile, line);
+		
 		int tempIndex = 0;
-		for (i = 0; i < vsize; i++){
-			myVocabulary[i] = line.at(tempIndex);
+		for (i = 0; i < vsize-1; i++){
+			inputFile >> myVocabulary[i] >> dumpComma;
 			tempIndex = tempIndex + 3;
 		}
+		inputFile >> myVocabulary[i];
 		myVocabulary.push_back('-');
 		// for(int i=0;i<myVocabulary.size();i++){
-		// 	cout<<myVocabulary[i]<<" ";
+		// 	cout<<myVocabulary[i]<<" " << vsize << endl;
 		// }
 		// cout<<endl;
-		getline(inputFile, line);
-		k = stoi(line);													// input for number of strings and the strings
+		
+		inputFile >> k;													// input for number of strings and the strings
 
 		for (i = 0; i < k; i++){
-			getline(inputFile, line);
-			tempString = line;
-			tempString.erase(remove(tempString.begin(), tempString.end(),' '), tempString.end());
+			
+			inputFile >> tempString;
+			// tempString.erase(remove(tempString.begin(), tempString.end(),' '), tempString.end());
 
-			myStrings.push_back(tempString.substr(0, tempString.size() - 1));
+			myStrings.push_back(tempString);
 			goalTuple.push_back(tempString.length());
 			zeroTuple.push_back(0);
 		}
-		getline(inputFile, line);
-		cc = stoi(line);													// input for conversion cost
+	
+		inputFile >> cc;													// input for conversion cost
 		string falseString;
 		int tempInt;											// input for matching cost matrix
 		for (i = 0; i < vsize + 1; i++) {
@@ -81,7 +82,7 @@ int main(int argc, char *argv[]){
 		time(&timestart);
 		startingTime = timestart;
 		timeLimit = (int)(execTime * 60 - 5);
-		// cout<<myStrings[2].size()<<endl;.
+
 		GeneSequence* genes = new GeneSequence(vsize + 1, myVocabulary, k, myStrings, cc, costMap);
 		HillClimbingState startState(myStrings);
 		int maxlen = genes->maxStringLength(myStrings) + 15;
@@ -100,7 +101,8 @@ int main(int argc, char *argv[]){
 			outputFile << answerReport[i] << endl;
 
 		}
-		cout << costReport << endl;
+
+		cout << "The cost value is: " << costReport << endl;
 		time(&timeend);
 	}
 	else{

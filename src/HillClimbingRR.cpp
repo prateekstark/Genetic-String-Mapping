@@ -34,7 +34,7 @@ int GeneSequence::stateCost(HillClimbingState state){
         int stringCost = computeCostString(posString);
 
         // if (stringCost == -1)
-        // 	return -1;
+        //  return -1;
 
         cost += stringCost;
     }
@@ -92,9 +92,9 @@ HillClimbingState GeneSequence::randomState(HillClimbingState startState){
 
     for (int i = 0; i < len; i++)
     {
-        int numDashes = rand() % (maxlen - randState.orientation[i].size() + 2);			//random number of dashes with relation
+        int numDashes = rand() % (maxlen - randState.orientation[i].size() + 2);            //random number of dashes with relation
                                                                                             //to the string length
-        for (int j = 0; j < numDashes; j++)													// inserting them at rand positions
+        for (int j = 0; j < numDashes; j++)                                                 // inserting them at rand positions
         {
             int randomPos = rand() % (randState.orientation[i].size() + 1);
             randState.orientation[i].insert(randState.orientation[i].begin() + randomPos, '-');
@@ -105,96 +105,111 @@ HillClimbingState GeneSequence::randomState(HillClimbingState startState){
 }
 
 int GeneSequence::localSearch(HillClimbingState startState, int longestLength){
-	HillClimbingState parent = startState;
+    HillClimbingState parent = startState;
 
-	//int childCost = stateCost(child);
+    //int childCost = stateCost(child);
 
-	HillClimbingState child;
-	HillClimbingState globalMinChild = startState;
+    HillClimbingState child;
+    HillClimbingState globalMinChild = startState;
 
-	int globalMinCost = -1;
+    int globalMinCost = -1;
 
-	for (long long x = 0; x < 4000; x++)
-	{
-		int minCost = -1;
-		bool minimaFound = false;
-		while (!minimaFound)
-		{
-			minimaFound = true;
-			int minChildIndex = -1;
-			minCost = stateCost(parent);
-			HillClimbingState minChild;
-			int sidewaysMoves = 10;
+    for (long long x = 0; x < 4000; x++)
+    {
+        int minCost = -1;
+        bool minimaFound = false;
+        while (!minimaFound)
+        {
+            minimaFound = true;
+            int minChildIndex = -1;
+            minCost = stateCost(parent);
+            HillClimbingState minChild;
+            int sidewaysMoves = 10;
 
-			int sumLengths = 0;
-			int deadend = -1;
-			int maxlen = 0;
-			for (string s : parent.orientation)
-			{
-				sumLengths += s.size() + 1;
-				if(s.size()>maxlen)
-				{
-					maxlen = s.size();
-				}
-			}
+            int sumLengths = 0;
+            int deadend = -1;
+            int maxlen = 0;
+            for (string s : parent.orientation)
+            {
+                sumLengths += s.size() + 1;
+                if(s.size()>maxlen)
+                {
+                    maxlen = s.size();
+                }
+            }
 
-			for (int i = 0; i < sumLengths ; i++)
-			{
-				// pair<HillClimbingState,bool> childPair = generateChild(parent, i, maxlen);
-				// child = childPair.first;
-				// if(!childPair.second)
-				// 	continue;
-				child = generateChild(parent, i, maxlen);
-				if(checkDead(child))
-					continue;
+            for (int i = 0; i < sumLengths ; i++)
+            {
+                // pair<HillClimbingState,bool> childPair = generateChild(parent, i, maxlen);
+                // child = childPair.first;
+                // if(!childPair.second)
+                //  continue;
+                child = generateChild(parent, i, maxlen);
+                if(checkDead(child))
+                    continue;
 
-				int childCost = stateCost(child);
+                int childCost = stateCost(child);
 
-				if (childCost < minCost && maxStringLength(child.orientation) <= longestLength && sidewaysMoves > 0)
-				{
-					// cout << "Lower cost found: " << endl;
-					// printStringVector(child.orientation);
-					// cout << "Cost: " << childCost << endl;
-					if(childCost == minCost)
-						sidewaysMoves--;
-					minChildIndex = i;
-					minChild = child;
-					minCost = childCost;
-					minimaFound = false;
+                if (childCost < minCost && maxStringLength(child.orientation) <= longestLength && sidewaysMoves > 0)
+                {
+                    // cout << "Lower cost found: " << endl;
+                    // printStringVector(child.orientation);
+                    // cout << "Cost: " << childCost << endl;
+                    if(childCost == minCost)
+                        sidewaysMoves--;
+                    minChildIndex = i;
+                    minChild = child;
+                    minCost = childCost;
+                    minimaFound = false;
+                    if (minCost < globalMinCost || globalMinCost == -1)
+                    {
+                        globalMinChild = parent;
+                        globalMinCost = minCost;
+                        if(globalMinCost < costReport || costReport == -1)
+                        {
+                            costReport = globalMinCost;
+                            answerReport = globalMinChild.orientation;
+                            if(reversed){
+                                answerReverse = 1;
+                            }
+                            else{
+                                answerReverse = 0;
+                            }
+                        }
+                    }
+                    time(&currentTime);
+                    if((int)(currentTime - startingTime) >= timeLimit)
+                        return globalMinCost;
+                }
+            }
 
-					time(&currentTime);
-					if((int)(currentTime - startingTime) >= timeLimit)
-						return globalMinCost;
-				}
-			}
+            if (minChildIndex != -1)
+                parent = minChild;
+        }
 
-			if (minChildIndex != -1)
-				parent = minChild;
-		}
-
-		if (minCost < globalMinCost || globalMinCost == -1)
-		{
-			globalMinChild = parent;
-			globalMinCost = minCost;
-			if(globalMinCost < costReport || costReport == -1)
-			{
-				costReport = globalMinCost;
-				answerReport = globalMinChild.orientation;
+        if (minCost < globalMinCost || globalMinCost == -1)
+        {
+            globalMinChild = parent;
+            globalMinCost = minCost;
+            if(globalMinCost < costReport || costReport == -1)
+            {
+                costReport = globalMinCost;
+                answerReport = globalMinChild.orientation;
                 if(reversed){
                     answerReverse = 1;
                 }
                 else{
                     answerReverse = 0;
                 }
-			}
+            }
 
-			// cout << "New minima converged at --" << endl;
-			// printStringVector(parent.orientation);
-			// cout << "Cost: " << globalMinCost << endl << endl;
-		}
-		parent = randomState(startState);
+            // cout << "New minima converged at --" << endl;
+            // printStringVector(parent.orientation);
+            // cout << "Cost: " << globalMinCost << endl << endl;
+        }
+        parent = randomState(startState);
 
-	}
+    }
 
-	return globalMinCost;
+    return globalMinCost;
 }
